@@ -1,6 +1,18 @@
 #!/bin/bash
 #
 # Install thepython depedencies
-python3 -m pip install -U pip
+pip3 install -U pip
+# save current dir
+dir=$PWD
+# Install devito in home directory
+cd $HOME
 git clone https://github.com/devitocodes/devito
-cd devito && pip install -e .[extras]
+cd devito
+pip install -e .[extras]
+
+# Make examples available
+mkdir -p /etc/skel/devito_examples
+cp -r examples/seismic/tutorials /etc/skel/devito_seismic_tutorials
+
+# get back
+cd $dir

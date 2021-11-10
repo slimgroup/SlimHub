@@ -1,6 +1,8 @@
 #!/bin/bash
 
-rm cloud-init-slimhub.yaml
+if [ -f cloud-init-slimhub.yaml ]; then
+  rm cloud-init-slimhub.yaml
+fi
 # Base of init is just python3
 tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
 #cloud-config
@@ -29,5 +31,5 @@ runcmd:
   - curl -L https://tljh.jupyter.org/bootstrap.py | sudo python3 - --admin slimadmin
   - cd "/home/slimazure/libs/"
   - sudo bash pylibs
-  - sudo basj jllibs
+  - sudo bash jllibs
 EOT
