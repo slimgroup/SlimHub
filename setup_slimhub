@@ -33,6 +33,8 @@ echo "Starting a JupyterHub $hname for $nuser users with $mem Gb of disk space"
 # Size is defined based on number odf expected users
 # run as `./makevm.sh nusers`
 
+# generate the cloud-init file
+bash cloud_init
 # create separate resource group for easy cleanup
 
 az group create -l eastus -n $rname
@@ -45,7 +47,7 @@ az vm create --resource-group $rname \
   --generate-ssh-keys \
   --location eastus \
   --os-disk-size-gb $mem \
-  --custom-data cloud-init.yaml
+  --custom-data cloud-init-slimhub.yaml
 
 # Open http and https ports for browser access
 az vm open-port \
@@ -54,9 +56,9 @@ az vm open-port \
     --port 80,443
 
 # create cleanup file
-tee -a cleanup.sh > /dev/null <<EOT
+tee -a cleanup_slimhub > /dev/null <<EOT
 #!/bin/bash
 az group delete -n $rname --yes
 EOT
 
-chmod +x cleanup.sh
+chmod +x cleanup_slimhub

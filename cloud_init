@@ -1,0 +1,33 @@
+#!/bin/bash
+
+rm cloud-init-slimhub.yaml
+# Base of init is just python3
+tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
+#cloud-config
+package_upgrade: true
+packages:
+  - python3-dev
+  - python3-pip
+EOT
+
+# add the config files
+
+tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
+write_files:
+  - owner: slimazure:slimazure
+    path: /home/slimazure/libs/pylibs
+    content: |
+$(cat setup_py | sed 's/^/      /')
+  - owner: slimazure:slimazure
+    path: /home/slimazure/libs/jllibs
+    content: |
+$(cat setup_jl | sed 's/^/      /')
+EOT
+
+tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
+runcmd:
+  - curl -L https://tljh.jupyter.org/bootstrap.py | sudo python3 - --admin slimadmin
+  - cd "/home/slimazure/libs/"
+  - sudo bash pylibs
+  - sudo basj jllibs
+EOT

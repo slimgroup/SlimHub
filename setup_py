@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# Install thepython depedencies
+python3 -m pip install -U pip
+git clone https://github.com/devitocodes/devito
+cd devito && pip install -e .[extras]
