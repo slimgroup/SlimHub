@@ -54,5 +54,9 @@ az vm open-port \
     --port 80,443
 
 # create cleanup file
-echo "az group delete -n $rname --yes" > cleanup.sh
+tee -a cleanup.sh > /dev/null <<EOT
+#!/bin/bash
+az group delete -n $rname --yes
+EOT
+
 chmod +x cleanup.sh
