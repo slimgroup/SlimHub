@@ -1,6 +1,7 @@
 #!/bin/bash
 #
 # Install thepython depedencies
+source /opt/tljh/user/bin/activate
 pip3 install -U pip
 # save current dir
 dir=$PWD
@@ -8,11 +9,12 @@ dir=$PWD
 cd $HOME
 git clone https://github.com/devitocodes/devito
 cd devito
+# activate the global environment
 pip install -e .[extras]
 
 # Make examples available
-mkdir -p /etc/skel/devito_examples
 cp -r examples/seismic/tutorials /etc/skel/devito_seismic_tutorials
 
+source /opt/tljh/user/bin/deactivate
 # get back
 cd $dir

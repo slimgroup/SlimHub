@@ -36,7 +36,7 @@ EOT
 for f in configs/*; do
   if [ -f "$f" ]; then
       tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
-  - sudo bash /opt/install_libs/$f
+  - bash /opt/install_libs/$f
 EOT
   fi
 done

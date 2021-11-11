@@ -51,10 +51,8 @@ az vm create --resource-group $rname \
   --custom-data cloud-init-slimhub.yaml
 
 # Open http and https ports for browser access
-az vm open-port \
-    --resource-group $rname \
-    --name $hname \
-    --port 80,443
+az vm open-port --resource-group $rname --name $hname --port 443 --priority 1020
+az vm open-port --resource-group $rname --name $hname --port 80 --priority 1021
 
 # create cleanup file
 if [ -f cleanup_slimhub ]; then
