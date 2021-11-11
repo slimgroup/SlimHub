@@ -47,11 +47,11 @@ julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; P
 cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
 
 # Add slim registry
-julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg;Pkg.Registry.add(RegistrySpec(url="https://Github.com/slimgroup/SLIMregistryJL.git"));Pkg.update();'
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.Registry.add(RegistrySpec(url="https://Github.com/slimgroup/SLIMregistryJL.git")); Pkg.update();'
 
 # Install PyCall and PyPlot that depends on odd system librairies
 export PYTHON=$(which python3)
-julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg;Pkg.add(["PyCall", "PyPlot"]);Pkg.build("PyCall");Pkg.build("PyPlot"); using PyCall, PyPlot'
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.add(["PyCall", "PyPlot"]); Pkg.build("PyCall"); Pkg.build("PyPlot"); using PyCall, PyPlot'
 
 # ensure all users can read General registry
 chmod -R a+rX $julia_global_depot

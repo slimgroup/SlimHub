@@ -13,23 +13,30 @@ packages:
 EOT
 
 # add the config files
-
 tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
 write_files:
-  - owner: slimazure:slimazure
-    path: /home/slimazure/libs/pylibs
-    content: |
-$(cat setup_py | sed 's/^/      /')
-  - owner: slimazure:slimazure
-    path: /home/slimazure/libs/jllibs
-    content: |
-$(cat setup_jl | sed 's/^/      /')
 EOT
+
+
+for f in configs/*; do
+  if [ -f "$f" ]; then
+    tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
+  - path: /opt/install_libs/$f
+    content: |
+$(cat $f | sed 's/^/      /')
+EOT
+  fi
+done
+
 
 tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
 runcmd:
   - curl -L https://tljh.jupyter.org/bootstrap.py | sudo python3 - --admin slimadmin
-  - cd "/home/slimazure/libs/"
-  - sudo bash pylibs
-  - sudo bash jllibs
 EOT
+for f in configs/*; do
+  if [ -f "$f" ]; then
+      tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
+  - sudo bash /opt/install_libs/$f
+EOT
+  fi
+done
