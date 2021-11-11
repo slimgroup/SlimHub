@@ -72,3 +72,8 @@ echo "# Add load-path to globally installed packages" > /etc/skel/.julia/config/
 echo "push!(LOAD_PATH, "\"$julia_global_env\"")" >> /etc/skel/.julia/config/startup.jl
 
 source /opt/tljh/user/bin/deactivate
+
+# Add the tutorials to the user env
+git clone https://github.com/slimgroup/ML4SeismicTutorials.git
+cp -r ML4SeismicTutorials /etc/skel/julia_tutorials
+rm -rf ML4SeismicTutorials

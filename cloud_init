@@ -10,34 +10,45 @@ package_upgrade: true
 packages:
   - python3-dev
   - python3-pip
-  - texlive-full # for notebook rendering
 EOT
+# Add back after debug
+#  - texlive-full # for notebook rendering
 
-# add the config files
+# add the config files and setup ssl certificates and https
 tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
 write_files:
+  - path: /opt/configs/setup_tljh
+    content: |
+      tljh-config set https.enabled true
+      tljh-config set https.letsencrypt.email mathias.louboutin@gmail.com
+      tljh-config add-item https.letsencrypt.domains $1
+      tljh-config set services.cull.timeout 1800
+      tljh-config set limits.cpu 4
+      tljh-config set limits.memory 8G
+      tljh-config reload cull
 EOT
 
-
+# Installs such as julia nd python libs
 for f in configs/*; do
   if [ -f "$f" ]; then
     tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
-  - path: /opt/install_libs/$f
+  - path: /opt/$f
     content: |
 $(cat $f | sed 's/^/      /')
 EOT
   fi
 done
 
-
+# Command list for cloud init
 tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
 runcmd:
-  - curl -L https://tljh.jupyter.org/bootstrap.py | sudo python3 - --admin slimadmin
+  - curl -L https://tljh.jupyter.org/bootstrap.py | python3 - --admin slimadmin
+  - bash /opt/configs/setup_tljh
 EOT
 for f in configs/*; do
   if [ -f "$f" ]; then
       tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
-  - bash /opt/install_libs/$f
+  - bash /opt/$f
 EOT
   fi
 done

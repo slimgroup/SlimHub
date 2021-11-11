@@ -25,36 +25,109 @@ while [[ $# -gt 0 ]]; do
 done
 
 rname=${hname}RG
-let "mem = 32 + $nuser * 6 / 10"
 
+# Infer disk size from number of users
+let "mem = 32 + $nuser * 6 / 10"
 echo "Starting a JupyterHub $hname for $nuser users with $mem Gb of disk space"
+# decide on VM size (nCPU, RAM) depending on number of users
+next2=$( echo "x=l(2*$nuser)/l(2); scale=0; 2^((x+1.5)/1)" | bc -l; )
+ncpu=$((next2 < 120 ? next2 : 120))
+
+if [[ $ncpu -gt 72 ]]; then
+  vm_size="Standard_HB120rs_v3"
+else
+  vm_size="Standard_F${ncpu}s_v2"
+fi
+
+echo "MaxDataDiskCount    MemoryInMb    Name                    NumberOfCores    OsDiskSizeInMb    ResourceDiskSizeInMb"
+echo "------------------  ------------  ----------------------  ---------------  ----------------  ----------------------"
+az vm list-sizes --location eastus -o table | grep ${vm_size}
 
 # Creates an azure vm with the littlest jupytehub for tutorials
 # Size is defined based on number odf expected users
-# run as `./makevm.sh nusers`
+# run as `./setup_slimhub.sh -h name -n 4`
 
 # generate the cloud-init setup file
-bash cloud_init
+echo "Create cloud-init file"
+domain="$hname.eastus.cloudapp.azure.com"
+bash cloud_init $domain
 
 # create separate resource group for easy cleanup
+echo "Create resource group"
+az group create -l eastus -n $rname > grplog
+rm grplog
 
-az group create -l eastus -n $rname
+# Setup https
+echo "Create network security group and rules"
+az network nsg create -g $rname -n ${rname}NSG > nsglog
 
+# Inbound http. This is needed for ssl certificate creation
+az network nsg rule create \
+  -g $rname \
+  -n "Allow Web Port" \
+  --nsg-name ${rname}NSG \
+  --access Allow \
+  --direction Inbound \
+  --priority 110 \
+  --source-address-prefix Internet \
+  --source-port-range "*" \
+  --destination-address-prefix "*" \
+  --destination-port-ranges 80 > nsglog
+
+# Inbound https for users
+az network nsg rule create \
+  -g $rname \
+  -n "Allow Https" \
+  --nsg-name ${rname}NSG \
+  --access Allow \
+  --direction Inbound \
+  --priority 150 \
+  --source-address-prefix Internet \
+  --source-port-range "*" \
+  --destination-address-prefix "*" \
+  --destination-port-ranges 443 > nsglog
+
+# ssh for admin
+az network nsg rule create \
+  --resource-group $rname \
+  --nsg-name  ${rname}NSG \
+  --name "Allow SSH" \
+  --access Allow \
+  --protocol Tcp \
+  --direction Inbound \
+  --priority 300 \
+  --source-address-prefix Internet \
+  --source-port-range "*" \
+  --destination-address-prefix "*" \
+  --destination-port-range 22 > nsglog
+
+
+rm nsglog
+
+# Create vm
+echo "Create VM"
 az vm create --resource-group $rname \
   --name $hname \
-  --size Standard_F8s_v2 \
+  --size $vm_size \
   --image Canonical:0001-com-ubuntu-server-focal:20_04-lts:latest \
   --admin-username slimazure \
   --generate-ssh-keys \
   --location eastus \
+  --nsg ${rname}NSG \
   --os-disk-size-gb $mem \
-  --custom-data cloud-init-slimhub.yaml
+  --public-ip-sku Standard \
+  --public-ip-address-dns-name $hname \
+  --custom-data cloud-init-slimhub.yaml > vmlog
 
-# Open http and https ports for browser access
-az vm open-port --resource-group $rname --name $hname --port 443 --priority 1020
-az vm open-port --resource-group $rname --name $hname --port 80 --priority 1021
+IP=$(cat vmlog | grep "publicIpAddress")
+echo $IP
+rm vmlog
+
+# Domain name
+echo "Access the jupyterhub at https://$domain"
 
 # create cleanup file
+echo "Generate cleanup script"
 if [ -f cleanup_slimhub ]; then
   rm cleanup_slimhub
 fi;
