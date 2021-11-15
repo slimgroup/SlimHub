@@ -17,8 +17,6 @@ EOT
 # add the config files and setup ssl certificates and https
 tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
 write_files:
-  - path: /opt/configs/slimcreds
-    content: $2
   - path: /opt/configs/setup_tljh
     content: |
       tljh-config set user_environment.default_app jupyterlab
@@ -28,10 +26,32 @@ write_files:
       tljh-config set services.cull.timeout 1800
       tljh-config set limits.cpu 4
       tljh-config set limits.memory 8G
+      while read -r line
+      do
+        tljh-config add-item users.allowed $r
+      done < /opt/configs/users
       tljh-config reload cull
 EOT
 
-# Installs such as julia nd python libs
+# Check if there is credentials for mecurvelet
+if [ ! -z $2 ]; then
+  creds=$(echo $2 | sed 's/\$/\\$/')
+  echo $creds
+tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
+  - path: /opt/configs/setup_99_mecurvelet
+    content: |
+      julia --project=\$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]);using Pkg; Pkg.add(url="https://$creds@github.gatech.edu/SLIM/MECurvelets.jl.git");Pkg.precompile()'
+EOT
+fi
+
+# Add all users
+tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
+  - path: /opt/configs/users
+    content: |
+$(python3 read_csv.py | sed 's/^/      /')
+EOT
+
+# Installs such as julia and python libs
 for f in configs/*; do
   if [ -f "$f" ]; then
     tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
@@ -47,12 +67,5 @@ tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
 runcmd:
   - curl -L https://tljh.jupyter.org/bootstrap.py | python3 - --admin slimadmin
   - bash /opt/configs/setup_tljh
+  - for f in /opt/configs/*; do bash \$f; done
 EOT
-for f in configs/*; do
-  ftype=$(file -b --mime-type $f)
-  if [ $ftype == "text/x-shellscript" ]; then
-      tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
-  - bash /opt/$f
-EOT
-  fi
-done
