@@ -9,11 +9,13 @@
 # activate jupyterhub env to get the correct python
 source /opt/tljh/user/bin/activate
 export PYTHON=$(which python3)
-
+export creds=$(cat /opt/configs/slimcreds)
 # parse arguments
 export julia_version="1.6.3"
 export julia_version_short=$(grep -o '^[0-9]*\.[0-9]*' <<< $julia_version)
 
+# Packges list
+export package_list=JOLI:SegyIO:JUDI:SlimOptim:SetIntersectionProjection:TimeProbeSeismic:InvertibleNetowrks:XConv:HDF5:JLD:JLD2:Images:ImageFiltering
 ## Download and unpack Julia
 export julia_archive_name="julia-$julia_version-linux-x86_64.tar.gz"
 export julia_parent_dir="/opt/julia"
@@ -56,6 +58,13 @@ julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; P
 # Install PyCall and PyPlot that depends on odd system librairies
 julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.add(["PyCall", "PyPlot"]); Pkg.build("PyCall"); Pkg.build("PyPlot"); using PyCall, PyPlot'
 
+# Install all common packages
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.add.(split(ENV["julia_packages"], '\'':'\'')); Pkg.precompile()'
+
+# Install ME curvelets
+if [[ -z $creds ]]; then
+    julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]);using Pkg; Pkg.add(url="https://ENV["creds"]@github.gatech.edu/SLIM/MECurvelets.jl.git");Pkg.precompile()'
+fi
 # ensure all users can read General registry
 chmod -R a+rX $julia_global_depot
 

@@ -2,6 +2,7 @@
 
 hname=slimhub
 nuser=2
+creds=""
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -17,6 +18,11 @@ while [[ $# -gt 0 ]]; do
       shift # past argument
       shift # past value
       ;;
+    -c|--creds)
+      creds="$2"
+      shift # past argument
+      shift # past value
+      ;;
     *)    # unknown option
       shift # past argument
       shift # past value
@@ -27,7 +33,7 @@ done
 rname=${hname}RG
 
 # Infer disk size from number of users
-let "mem = 32 + $nuser * 6 / 10"
+let "mem = 32 + $nuser"
 echo "Starting a JupyterHub $hname for $nuser users with $mem Gb of disk space"
 # decide on VM size (nCPU, RAM) depending on number of users
 next2=$( echo "x=l(2*$nuser)/l(2); scale=0; 2^((x+1.5)/1)" | bc -l; )
@@ -50,7 +56,7 @@ az vm list-sizes --location eastus -o table | grep ${vm_size}
 # generate the cloud-init setup file
 echo "Create cloud-init file"
 domain="$hname.eastus.cloudapp.azure.com"
-bash cloud_init $domain
+bash cloud_init $domain $creds
 
 # create separate resource group for easy cleanup
 echo "Create resource group"
@@ -119,8 +125,8 @@ az vm create --resource-group $rname \
   --public-ip-address-dns-name $hname \
   --custom-data cloud-init-slimhub.yaml > vmlog
 
-IP=$(cat vmlog | grep "publicIpAddress")
-echo $IP
+IP=$(cat vmlog | grep "publicIpAddress" | grep -o "[0-9.]\+")
+echo "ssh slimazure@$IP"
 rm vmlog
 
 # Domain name
