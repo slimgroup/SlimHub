@@ -9,13 +9,13 @@
 # activate jupyterhub env to get the correct python
 source /opt/tljh/user/bin/activate
 export PYTHON=$(which python3)
-export creds=$(cat /opt/configs/slimcreds)
+
 # parse arguments
 export julia_version="1.6.3"
 export julia_version_short=$(grep -o '^[0-9]*\.[0-9]*' <<< $julia_version)
 
 # Packges list
-export package_list=JOLI:SegyIO:JUDI:SlimOptim:SetIntersectionProjection:TimeProbeSeismic:InvertibleNetoworks:XConv:HDF5:JLD:JLD2:Images:ImageFiltering
+export package_list=JOLI:SegyIO:JUDI:SlimOptim:SetIntersectionProjection:TimeProbeSeismic:InvertibleNetworks:XConv:HDF5:JLD:JLD2:Images:ImageFiltering
 ## Download and unpack Julia
 export julia_archive_name="julia-$julia_version-linux-x86_64.tar.gz"
 export julia_parent_dir="/opt/julia"

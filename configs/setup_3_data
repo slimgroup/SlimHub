@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# make shared folder
+mkdir -p /srv/data/shared_data 
+
+# Get  data for segyIO
+curl -L -o bptti.zip https://www.dropbox.com/sh/u8aire016mea6ro/AADFfTAVoWtHOvEBg18VbxJEa?dl=0
+unzip bptti.zip -d /srv/data/shared_data/bpttidata
+rm bptti.zip
+
+# Make shared folder
+ln -s /srv/data/shared_data  /etc/skel/data
