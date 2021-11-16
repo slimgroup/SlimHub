@@ -6,14 +6,16 @@ This repository contains two script:
 
 - `cloud_init` generates the yaml file for the VM configuration (jupyterhub, julia, ..)
 - `setup_slimhub` creates the vm. This one takes two arguments:
-    - `h/--hname` the name of the server
-    - `m/--nuser` the number of expected users. This number is only used for disk space currently.
+    - `-h/--hname` the name of the server
+    - `-m/--nuser` the number of expected users. This number is only used for disk space currently.
+    - `-c/--creds` creddentials for `github.gatech.edu` as "username:password" to install MECurvelets.jl
 
 There is a `configs` directory with configuration files. These files are bash script that install any required library for all users.
 You can add additional script to this directory if you wish to install additional software and backage. There is currently two configuration files:
 
 - `setup_2_jl`. This one  is a bit messy but is necessary to have julia installed and usaable for all users on the server
 - `setup_1_py`. This one is fairly simple and only installs devito and put the jupyter notebook tutorials into the users workspace.
+- `setup_3_data`. Straightforward. Downloads the shared data (drobox download right now) and make it shared to all users.
 
 **NOTE 1**: 
 JupyterHub is as multi-user server. Standard package installs may not make it available to users, check the documentation at [jupyterhub] to figure out how the `PATH` should be setup to make software available to all users.

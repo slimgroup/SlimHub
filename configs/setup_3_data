@@ -3,10 +3,11 @@
 # make shared folder
 mkdir -p /srv/data/shared_data 
 
-# Get  data for segyIO
-curl -L -o bptti.zip https://www.dropbox.com/sh/u8aire016mea6ro/AADFfTAVoWtHOvEBg18VbxJEa?dl=0
-unzip bptti.zip -d /srv/data/shared_data/bpttidata
-rm bptti.zip
+# Get tutorials data
+curl -L -o shared.zip https://www.dropbox.com/sh/m2ksfp7wjww3jds/AADswzf_8ZdMiDW-nmrLNgJ0a?dl=0
+unzip shared.zip -d /srv/data/shared_data
+mv /srv/data/shared_data/bptti /srv/data/shared_data/bpttidata
+rm shared.zip
 
 # Make shared folder
 ln -s /srv/data/shared_data  /etc/skel/data
