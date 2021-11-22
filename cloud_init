@@ -10,7 +10,7 @@ package_upgrade: true
 packages:
   - python3-dev
   - python3-pip
-  - texlive-full 
+  - texlive-full
 EOT
 
 # add the config files and setup ssl certificates and https
@@ -31,23 +31,21 @@ write_files:
       tljh-config set services.cull.timeout 1800
       tljh-config set limits.cpu 4
       tljh-config set limits.memory 8G
-      tljh-config reload cull
       # Add all users
       while read -r line
       do
         tljh-config add-item users.allowed \$line
       done < /opt/configs/users
+      tljh-config reload
 EOT
+
 
 # Check if there is credentials for mecurvelet
 if [ ! -z $2 ]; then
-  creds=$(echo $2 | sed 's/\$/\\$/')
-  echo $creds
 tee -a cloud-init-slimhub.yaml > /dev/null <<-EOT
   - path: /opt/configs/me_creds
     content: |
-      julia --project=\$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]);using Pkg; Pkg.add(url="https://$creds@github.gatech.edu/SLIM/MECurvelets.jl.git");Pkg.precompile()'
-      chmod -R a+rX $(julia -e 'print(DEPOT_PATH[2])')
+      $2
 EOT
 fi
 

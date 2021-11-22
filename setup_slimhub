@@ -40,7 +40,7 @@ next2=$( echo "x=l(2*$nuser)/l(2); scale=0; 2^((x+1.5)/1)" | bc -l; )
 ncpu=$((next2 < 120 ? next2 : 120))
 
 if [[ $ncpu -gt 72 ]]; then
-  vm_size="Standard_HB120rs_v3"
+  vm_size="Standard_HB120rs_v2"
 else
   vm_size="Standard_F${ncpu}s_v2"
 fi
@@ -145,11 +145,11 @@ EOT
 
 chmod +x cleanup_slimhub
 
-status=$(ssh -oStrictHostKeyChecking=accept-new $slimazure@$IP 'cat /var/log/cloud-init-output.log | grep "finished at"')
+status=$(ssh -oStrictHostKeyChecking=accept-new slimazure@$IP 'cat /var/log/cloud-init-output.log | grep "finished at"')
 while [ -z "$status" ]
 do
   echo "Waiting for startup to be done"
   sleep 15
-  status=$(ssh $VM_USER@$IP 'cat /var/log/cloud-init-output.log | grep "finished at"')
+  status=$(ssh slimazure@$IP 'cat /var/log/cloud-init-output.log | grep "finished at"')
 done
 echo "Hub is ready"

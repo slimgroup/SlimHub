@@ -1,13 +1,12 @@
 #!/bin/bash
-
+  
 # make shared folder
-mkdir -p /srv/data/shared_data 
+mkdir -p /srv/data/shared_data
+ln -s /srv/data/shared_data /etc/skel/data
 
 # Get tutorials data
 curl -L -o shared.zip https://www.dropbox.com/sh/m2ksfp7wjww3jds/AADswzf_8ZdMiDW-nmrLNgJ0a?dl=0
 unzip shared.zip -d /srv/data/shared_data
 mv /srv/data/shared_data/bptti /srv/data/shared_data/bpttidata
 rm shared.zip
-
-# Make shared folder
-ln -s /srv/data/shared_data  /etc/skel/data
+chmod -R 777 /srv/data/shared_data
