@@ -10,7 +10,7 @@ cd $HOME
 git clone https://github.com/devitocodes/devito
 cd devito
 # activate the global environment
-sudo -E pip install -e .[extras]
+pip install -e .[extras]
 
 # Make examples available
 cp -r examples/seismic/tutorials /etc/skel/devito_seismic_tutorials
