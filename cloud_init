@@ -29,8 +29,8 @@ write_files:
       tljh-config reload proxy
       # User limits
       tljh-config set services.cull.timeout 1800
-      tljh-config set limits.cpu 4
-      tljh-config set limits.memory 8G
+      tljh-config set limits.cpu 8
+      tljh-config set limits.memory 16G
       # Add all users
       while read -r line
       do

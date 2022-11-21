@@ -3,18 +3,30 @@
 # Install thepython depedencies
 source /opt/tljh/user/bin/activate
 pip3 install -U pip
+
 # save current dir
 dir=$PWD
+
 # Install devito in home directory
 cd $HOME
 git clone https://github.com/devitocodes/devito
 cd devito
-# activate the global environment
+
+# Install devito
 pip install -e .[extras]
 
 # Make examples available
 cp -r examples/seismic/tutorials /etc/skel/devito_seismic_tutorials
 
+# dfno
+cd $HOME
+git clone https://github.com/slimgroup/dfno
+cd dfno
+pip install -e .
+cd $HOME
+cp -r dfno /etc/skel/dfno
+
 source /opt/tljh/user/bin/deactivate
+
 # get back
 cd $dir
